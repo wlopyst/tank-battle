@@ -572,11 +572,17 @@ function updateBullets() {
         // 子弹飞越水面
       }
       if (tile === BASE) {
-        map[row][col] = BASE_DEAD;
-        bullets.splice(i, 1);
-        addExplosion(col * TILE + TILE/2, row * TILE + TILE/2, 'big');
-        gameOver();
-        continue;
+        // 只有敌方子弹才能摧毁基地
+        if (b.owner === 'enemy') {
+          map[row][col] = BASE_DEAD;
+          bullets.splice(i, 1);
+          addExplosion(col * TILE + TILE/2, row * TILE + TILE/2, 'big');
+          gameOver();
+          continue;
+        } else {
+          // 玩家子弹穿过基地
+          continue;
+        }
       }
     }
   }
