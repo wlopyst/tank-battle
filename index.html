@@ -429,14 +429,33 @@ function updatePlayer() {
   else if (keys['ArrowLeft'] || keys['a'] || keys['A']) { newDir = LEFT; moved = true; }
   else if (keys['ArrowRight'] || keys['d'] || keys['D']) { newDir = RIGHT; moved = true; }
 
+  // 方向改变时对齐网格
+  if (newDir !== player.dir) {
+    snapTankToGrid(player, newDir);
+  }
   player.dir = newDir;
 
   if (moved) {
-    const nx = player.x + DX[newDir] * player.speed;
-    const ny = player.y + DY[newDir] * player.speed;
+    let nx = player.x + DX[newDir] * player.speed;
+    let ny = player.y + DY[newDir] * player.speed;
     if (canMove(nx, ny, player.size, player)) {
       player.x = nx;
       player.y = ny;
+    } else {
+      // 移动受阻时，尝试对齐到网格线
+      if (newDir === UP || newDir === DOWN) {
+        const snappedX = snapToGrid(player.x);
+        if (canMove(snappedX, ny, player.size, player)) {
+          player.x = snappedX;
+          player.y = ny;
+        }
+      } else {
+        const snappedY = snapToGrid(player.y);
+        if (canMove(nx, snappedY, player.size, player)) {
+          player.x = nx;
+          player.y = snappedY;
+        }
+      }
     }
     player.animFrame++;
   }
@@ -473,20 +492,44 @@ function updateEnemies() {
     if (e.aiChangeTimer <= 0) {
       // AI 随机改变方向
       const dirs = [UP, DOWN, LEFT, RIGHT];
-      e.aiDir = dirs[Math.floor(Math.random() * 4)];
+      const newDir = dirs[Math.floor(Math.random() * 4)];
+      // 方向改变时对齐网格
+      if (newDir !== e.dir) {
+        snapTankToGrid(e, newDir);
+      }
+      e.aiDir = newDir;
       e.aiChangeTimer = 60 + Math.floor(Math.random() * 120);
     }
 
     e.dir = e.aiDir;
-    const nx = e.x + DX[e.dir] * e.speed;
-    const ny = e.y + DY[e.dir] * e.speed;
+    let nx = e.x + DX[e.dir] * e.speed;
+    let ny = e.y + DY[e.dir] * e.speed;
 
     if (canMove(nx, ny, e.size, e)) {
       e.x = nx;
       e.y = ny;
       e.animFrame++;
     } else {
-      e.aiChangeTimer = 0; // 碰墙立即换方向
+      // 移动受阻时，尝试对齐到网格线
+      if (e.dir === UP || e.dir === DOWN) {
+        const snappedX = snapToGrid(e.x);
+        if (canMove(snappedX, ny, e.size, e)) {
+          e.x = snappedX;
+          e.y = ny;
+          e.animFrame++;
+        } else {
+          e.aiChangeTimer = 0;
+        }
+      } else {
+        const snappedY = snapToGrid(e.y);
+        if (canMove(nx, snappedY, e.size, e)) {
+          e.x = nx;
+          e.y = snappedY;
+          e.animFrame++;
+        } else {
+          e.aiChangeTimer = 0;
+        }
+      }
     }
 
     if (e.shootCooldown > 0) e.shootCooldown--;
@@ -602,6 +645,28 @@ function shoot(tank) {
     owner: tank.type === 'player' ? 'player' : 'enemy',
     size: 4,
   });
+}
+
+function snapToGrid(val) {
+  return Math.round(val / TILE) * TILE;
+}
+
+function snapTankToGrid(tank, newDir) {
+  // 当改变方向时，将垂直于移动方向的轴对齐到最近的网格线
+  const tolerance = 8; // 对齐容差（像素）
+  if (newDir === UP || newDir === DOWN) {
+    // 垂直移动时，对齐 X 轴
+    const nearestX = snapToGrid(tank.x);
+    if (Math.abs(tank.x - nearestX) <= tolerance) {
+      tank.x = nearestX;
+    }
+  } else {
+    // 水平移动时，对齐 Y 轴
+    const nearestY = snapToGrid(tank.y);
+    if (Math.abs(tank.y - nearestY) <= tolerance) {
+      tank.y = nearestY;
+    }
+  }
 }
 
 function canMove(x, y, size, self) {
