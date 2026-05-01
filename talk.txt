@@ -1,0 +1,1565 @@
+ 创建一个html坦克大战，并上传到GitHub上变成一个仓库
+
+● Skill(superpowers:brainstorming)
+  ⎿  Successfully loaded skill
+
+● 我来帮你创建一个 HTML 坦克大战游戏并上传到 GitHub。让我先了解一下当前环境，然后我们讨论一下设计。
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Bash(which gh 2>/dev/null && gh auth status 2>&1 || echo "gh CLI not available or not authenticated")
+  ⎿  gh CLI not available or not authenticated
+
+● Bash(which git 2>/dev/null && git --version || echo "git not available")
+  ⎿  /mingw64/bin/git
+     git version 2.54.0.windows.1
+
+● Bash(git config --global user.name 2>/dev/null; git config --global user.email 2>/dev/null)
+  ⎿  Error: Exit code 1
+
+● 我已经检查了环境情况：
+
+  - Git: 可用 (v2.54.0)，但尚未配置用户信息
+  - GitHub CLI (gh): 未安装或未认证
+  - 桌面: 有一些文件和文件夹，可以在此创建项目
+
+  在开始设计之前，我想先问你几个问题来确定游戏的范围和风格：
+
+● User answered Claude's questions:
+  ⎿  · 你希望这个坦克大战是什么风格的？ → 经典 FC 坦克大战 (推荐)
+     · 你希望支持哪些游戏模式？ → 单人模式 (推荐)
+     · 你需要支持 GitHub 上传吗？目前 gh CLI 未安装，你可以： → 我手动上传
+
+● 明白了！经典 FC 风格、单人模式、你手动上传到 GitHub。让我提出几个实现方案：
+
+  方案对比
+
+  方案 A: 单 HTML 文件 + Canvas（推荐）
+  - 所有代码写在一个 index.html 里
+  - 使用 HTML5 Canvas 渲染，像素风格完美还原
+  - 双击即可运行，无需服务器
+  - 优点：最简单，一个文件搞定，适合 GitHub Pages 直接部署
+  - 缺点：代码都在一个文件里，维护性一般
+
+  方案 B: 多文件项目 + Canvas
+  - 分离 HTML / CSS / JS 文件
+  - 使用 Canvas 渲染
+  - 优点：代码组织清晰
+  - 缺点：需要本地服务器运行（或配置 GitHub Pages），文件多一些
+
+  方案 C: 单 HTML 文件 + DOM 元素
+  - 用 div 做游戏对象，CSS 做样式
+  - 优点：CSS 动画效果好
+  - 缺点：性能差，像素风格还原度低
+
+  我推荐方案 A，因为经典坦克大战用 Canvas 最合适，单文件方便分享和部署。
+
+● User answered Claude's questions:
+  ⎿  · 你倾向哪个方案？ → 方案 A: 单文件 + Canvas (推荐)
+
+● 游戏设计
+
+  核心玩法
+
+  - 地图: 13x13 的网格系统，经典坦克大战布局
+  - 玩家坦克: 方向键移动，空格射击
+  - 敌方坦克: AI 控制，从地图顶部生成，自动移动和射击
+  - 基地: 地图底部中央的鹰标，被摧毁则游戏结束
+  - 目标: 消灭所有敌方坦克过关
+
+  地形元素
+
+  ┌──────┬──────────────────────────────────┐
+  │ 元素 │               说明               │
+  ├──────┼──────────────────────────────────┤
+  │ 砖墙 │ 可被子弹摧毁                     │
+  ├──────┼──────────────────────────────────┤
+  │ 钢墙 │ 不可摧毁                         │
+  ├──────┼──────────────────────────────────┤
+  │ 河流 │ 坦克不可通过，子弹可飞越         │
+  ├──────┼──────────────────────────────────┤
+  │ 草地 │ 坦克可通行，覆盖坦克（隐藏效果） │
+  ├──────┼──────────────────────────────────┤
+  │ 冰面 │ 坦克可通行，移动时会滑行         │
+  └──────┴──────────────────────────────────┘
+
+  道具系统
+
+  - 星星: 升级坦克（射速/速度提升）
+  - 炸弹: 消灭当前所有敌方坦克
+  - 护盾: 临时无敌
+  - 铲子: 临时加固基地周围为钢墙
+
+  技术实现
+
+  - 渲染: Canvas 2D，16x16 像素块绘制
+  - 帧率: 60fps 游戏循环
+  - 碰撞检测: 基于网格的碰撞系统
+  - 音效: 无（保持单文件简洁）
+  - 存档: 无
+
+  关卡
+
+  - 预设 5 个关卡，不同地图布局
+  - 每关 20 个敌方坦克
+  - 通关后自动进入下一关
+
+● User answered Claude's questions:
+  ⎿  · 以上游戏设计是否符合你的期望？ → 设计通过，开始实现
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ 继续
+
+● 好的，继续实现坦克大战游戏。让我创建完整的单文件 HTML 游戏。
+
+● Write(tank-battle\index.html)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Create file
+ tank-battle\index.html
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+     1 <!DOCTYPE html>
+     2 <html lang="zh-CN">
+     3 <head>
+     4 <meta charset="UTF-8">
+     5 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     6 <title>经典坦克大战</title>
+     7 <style>
+     8 * { margin: 0; padding: 0; box-sizing: border-box; }
+     9 body {
+    10   background: #000;
+    11   display: flex;
+    12   justify-content: center;
+    13   align-items: center;
+    14   min-height: 100vh;
+    15   font-family: 'Courier New', monospace;
+    16   color: #fff;
+    17 }
+    18 #gameContainer {
+    19   display: flex;
+    20   gap: 20px;
+    21   align-items: flex-start;
+    22 }
+    23 canvas {
+    24   border: 3px solid #555;
+    25   image-rendering: pixelated;
+    26 }
+    27 #sidebar {
+    28   width: 160px;
+    29   padding: 10px;
+    30   background: #111;
+    31   border: 2px solid #555;
+    32 }
+    33 #sidebar h3 {
+    34   color: #c00;
+    35   margin-bottom: 10px;
+    36   text-align: center;
+    37 }
+    38 .info-item {
+    39   margin: 8px 0;
+    40   font-size: 14px;
+    41 }
+    42 .info-item span { color: #ff0; }
+    43 #enemyIcons {
+    44   display: flex;
+    45   flex-wrap: wrap;
+    46   gap: 2px;
+    47   margin: 5px 0;
+    48 }
+    49 .enemy-icon {
+    50   width: 16px;
+    51   height: 16px;
+    52   background: #c00;
+    53 }
+    54 #controls {
+    55   margin-top: 15px;
+    56   font-size: 11px;
+    57   color: #888;
+    58   line-height: 1.6;
+    59 }
+    60 #overlay {
+    61   position: absolute;
+    62   top: 0;
+    63   left: 0;
+    64   width: 100%;
+    65   height: 100%;
+    66   display: flex;
+    67   justify-content: center;
+    68   align-items: center;
+    69   flex-direction: column;
+    70   pointer-events: none;
+    71 }
+    72 #overlay.active { pointer-events: auto; }
+    73 #overlayText {
+    74   font-size: 28px;
+    75   color: #ff0;
+    76   text-shadow: 2px 2px #000;
+    77   display: none;
+    78 }
+    79 #startScreen {
+    80   position: absolute;
+    81   top: 50%;
+    82   left: 50%;
+    83   transform: translate(-50%, -50%);
+    84   text-align: center;
+    85   z-index: 10;
+    86 }
+    87 #startScreen h1 {
+    88   font-size: 36px;
+    89   color: #c00;
+    90   margin-bottom: 30px;
+    91   text-shadow: 3px 3px #000;
+    92 }
+    93 #startScreen .menu-item {
+    94   font-size: 20px;
+    95   color: #fff;
+    96   margin: 10px 0;
+    97   cursor: pointer;
+    98 }
+    99 #startScreen .menu-item.selected { color: #ff0; }
+   100 #startScreen .menu-item:hover { color: #ff0; }
+   101 #startScreen .subtitle {
+   102   color: #888;
+   103   font-size: 12px;
+   104   margin-top: 30px;
+   105 }
+   106 </style>
+   107 </head>
+   108 <body>
+   109 <div id="gameContainer">
+   110   <canvas id="gameCanvas" width="416" height="416"></canvas>
+   111   <div id="sidebar">
+   112     <h3>坦克大战</h3>
+   113     <div class="info-item">关卡: <span id="levelNum">1</span></div>
+   114     <div class="info-item">得分: <span id="scoreNum">0</span></div>
+   115     <div class="info-item">生命: <span id="livesNum">3</span></div>
+   116     <div class="info-item">敌人: <span id="enemyIcons"></span></div>
+   117     <div id="controls">
+   118       <b>操作说明:</b><br>
+   119       ↑↓←→ 移动<br>
+   120       空格 射击<br>
+   121       P 暂停<br>
+   122       R 重新开始
+   123     </div>
+   124   </div>
+   125 </div>
+   126
+   127 <div id="startScreen">
+   128   <h1>坦克大战</h1>
+   129   <div class="menu-item selected" onclick="startGame()">开始游戏</div>
+   130   <div class="subtitle">方向键选择 · 回车确认</div>
+   131 </div>
+   132
+   133 <script>
+   134 // ===== 游戏常量 =====
+   135 const TILE = 32;
+   136 const COLS = 13;
+   137 const ROWS = 13;
+   138 const W = COLS * TILE;
+   139 const H = ROWS * TILE;
+   140 const FPS = 60;
+   141
+   142 // 地形类型
+   143 const EMPTY = 0, BRICK = 1, STEEL = 2, WATER = 3, GRASS = 4, ICE = 5, BASE
+        = 6, BASE_DEAD = 7;
+   144
+   145 // 方向
+   146 const UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3;
+   147 const DX = [0, 1, 0, -1];
+   148 const DY = [-1, 0, 1, 0];
+   149
+   150 // 颜色
+   151 const COLORS = {
+   152   bg: '#000',
+   153   brick: '#b53120',
+   154   brickDark: '#8a2518',
+   155   steel: '#b0b0b0',
+   156   steelLight: '#d0d0d0',
+   157   water: '#0055aa',
+   158   waterLight: '#0077cc',
+   159   grass: '#00aa00',
+   160   grassDark: '#008800',
+   161   ice: '#aaddff',
+   162   iceLight: '#cceeFF',
+   163   base: '#ffcc00',
+   164   baseDark: '#cc9900',
+   165   player: '#ffcc00',
+   166   playerDark: '#cc9900',
+   167   enemy1: '#b0b0b0',
+   168   enemy1Dark: '#808080',
+   169   enemy2: '#00cc00',
+   170   enemy2Dark: '#009900',
+   171   enemy3: '#cc0000',
+   172   enemy3Dark: '#990000',
+   173   bullet: '#fff',
+   174   shield: '#00aaff',
+   175   powerup: '#ff00ff',
+   176 };
+   177
+   178 // ===== 游戏状态 =====
+   179 let canvas, ctx;
+   180 let gameState = 'menu'; // menu, playing, paused, gameover, levelclear, wi
+       n
+   181 let map = [];
+   182 let player = null;
+   183 let enemies = [];
+   184 let bullets = [];
+   185 let powerups = [];
+   186 let particles = [];
+   187 let explosions = [];
+   188 let score = 0;
+   189 let lives = 3;
+   190 let level = 1;
+   191 let enemiesRemaining = 0;
+   192 let enemySpawnTimer = 0;
+   193 let enemySpawnIndex = 0;
+   194 let levelEnemies = [];
+   195 let shieldTimer = 0;
+   196 let shovelTimer = 0;
+   197 let keys = {};
+   198 let animFrame = 0;
+   199
+   200 // ===== 关卡数据 =====
+   201 // 13x13 网格: 0=空 1=砖 2=钢 3=水 4=草 5=冰 6=基地
+   202 // 基地在底部中央 (12, 6)
+   203 const LEVELS = [
+   204   // 关卡 1
+   205   [
+   206     [0,0,0,0,0,0,0,0,0,0,0,0,0],
+   207     [0,1,0,1,0,1,0,1,0,1,0,1,0],
+   208     [0,1,0,1,0,1,0,1,0,1,0,1,0],
+   209     [0,1,0,1,0,1,1,1,0,1,0,1,0],
+   210     [0,1,0,1,0,0,0,0,0,1,0,1,0],
+   211     [0,0,0,0,0,1,0,1,0,0,0,0,0],
+   212     [0,0,0,1,0,1,0,1,0,1,0,0,0],
+   213     [1,1,0,1,0,0,0,0,0,1,0,1,1],
+   214     [0,0,0,1,0,1,0,1,0,1,0,0,0],
+   215     [0,1,0,1,0,1,0,1,0,1,0,1,0],
+   216     [0,1,0,0,0,0,0,0,0,0,0,1,0],
+   217     [0,1,0,1,0,1,0,1,0,1,0,1,0],
+   218     [0,0,0,1,0,1,6,1,0,1,0,0,0],
+   219   ],
+   220   // 关卡 2
+   221   [
+   222     [0,0,0,0,0,0,0,0,0,0,0,0,0],
+   223     [0,1,1,0,1,1,0,1,1,0,1,1,0],
+   224     [0,1,1,0,1,1,0,1,1,0,1,1,0],
+   225     [0,0,0,0,0,0,0,0,0,0,0,0,0],
+   226     [1,0,0,2,0,0,0,0,0,2,0,0,1],
+   227     [1,0,0,2,0,1,3,1,0,2,0,0,1],
+   228     [0,0,0,0,0,3,3,3,0,0,0,0,0],
+   229     [1,0,0,2,0,1,3,1,0,2,0,0,1],
+   230     [1,0,0,2,0,0,0,0,0,2,0,0,1],
+   231     [0,0,0,0,0,0,0,0,0,0,0,0,0],
+   232     [0,1,1,0,1,1,0,1,1,0,1,1,0],
+   233     [0,1,1,0,1,1,0,1,1,0,1,1,0],
+   234     [0,0,0,0,0,1,6,1,0,0,0,0,0],
+   235   ],
+   236   // 关卡 3
+   237   [
+   238     [0,0,0,0,0,0,0,0,0,0,0,0,0],
+   239     [0,4,4,0,1,1,0,1,1,0,4,4,0],
+   240     [0,4,4,0,1,0,0,0,1,0,4,4,0],
+   241     [0,0,0,0,0,0,1,0,0,0,0,0,0],
+   242     [0,1,0,2,0,1,1,1,0,2,0,1,0],
+   243     [0,1,0,0,0,0,0,0,0,0,0,1,0],
+   244     [1,1,0,0,2,0,0,0,2,0,0,1,1],
+   245     [0,1,0,0,0,0,0,0,0,0,0,1,0],
+   246     [0,1,0,2,0,1,1,1,0,2,0,1,0],
+   247     [0,0,0,0,0,0,1,0,0,0,0,0,0],
+   248     [0,4,4,0,1,0,0,0,1,0,4,4,0],
+   249     [0,4,4,0,1,1,0,1,1,0,4,4,0],
+   250     [0,0,0,0,0,1,6,1,0,0,0,0,0],
+   251   ],
+   252   // 关卡 4
+   253   [
+   254     [0,0,0,0,0,0,0,0,0,0,0,0,0],
+   255     [0,2,0,0,0,4,4,4,0,0,0,2,0],
+   256     [0,0,0,1,0,4,0,4,0,1,0,0,0],
+   257     [0,0,1,1,0,0,0,0,0,1,1,0,0],
+   258     [0,0,0,0,2,0,0,0,2,0,0,0,0],
+   259     [4,0,0,0,0,1,3,1,0,0,0,0,4],
+   260     [4,4,0,0,0,3,3,3,0,0,0,4,4],
+   261     [4,0,0,0,0,1,3,1,0,0,0,0,4],
+   262     [0,0,0,0,2,0,0,0,2,0,0,0,0],
+   263     [0,0,1,1,0,0,0,0,0,1,1,0,0],
+   264     [0,0,0,1,0,4,0,4,0,1,0,0,0],
+   265     [0,2,0,0,0,4,4,4,0,0,0,2,0],
+   266     [0,0,0,0,0,1,6,1,0,0,0,0,0],
+   267   ],
+   268   // 关卡 5
+   269   [
+   270     [0,0,0,0,0,0,0,0,0,0,0,0,0],
+   271     [2,0,1,0,2,0,1,0,2,0,1,0,2],
+   272     [0,0,1,0,0,0,1,0,0,0,1,0,0],
+   273     [0,1,1,0,0,1,1,1,0,0,1,1,0],
+   274     [0,0,0,0,5,5,0,5,5,0,0,0,0],
+   275     [1,0,0,5,5,0,0,0,5,5,0,0,1],
+   276     [1,0,0,5,0,2,0,2,0,5,0,0,1],
+   277     [1,0,0,5,5,0,0,0,5,5,0,0,1],
+   278     [0,0,0,0,5,5,0,5,5,0,0,0,0],
+   279     [0,1,1,0,0,1,1,1,0,0,1,1,0],
+   280     [0,0,1,0,0,0,1,0,0,0,1,0,0],
+   281     [2,0,1,0,2,0,1,0,2,0,1,0,2],
+   282     [0,0,0,0,0,1,6,1,0,0,0,0,0],
+   283   ],
+   284 ];
+   285
+   286 // ===== 初始化 =====
+   287 function init() {
+   288   canvas = document.getElementById('gameCanvas');
+   289   ctx = canvas.getContext('2d');
+   290   ctx.imageSmoothingEnabled = false;
+   291
+   292   document.addEventListener('keydown', e => {
+   293     keys[e.key] = true;
+   294     handleKey(e.key);
+   295     e.preventDefault();
+   296   });
+   297   document.addEventListener('keyup', e => {
+   298     keys[e.key] = false;
+   299     e.preventDefault();
+   300   });
+   301
+   302   requestAnimationFrame(gameLoop);
+   303 }
+   304
+   305 function startGame() {
+   306   document.getElementById('startScreen').style.display = 'none';
+   307   score = 0;
+   308   lives = 3;
+   309   level = 1;
+   310   loadLevel(level);
+   311   gameState = 'playing';
+   312 }
+   313
+   314 function loadLevel(lvl) {
+   315   const li = Math.min(lvl - 1, LEVELS.length - 1);
+   316   map = LEVELS[li].map(row => [...row]);
+   317
+   318   // 在基地周围加砖墙保护
+   319   protectBase();
+   320
+   321   // 玩家
+   322   player = createTank(4 * TILE, 12 * TILE, UP, 'player');
+   323   player.speed = 1.5;
+   324
+   325   // 敌人
+   326   enemies = [];
+   327   bullets = [];
+   328   powerups = [];
+   329   particles = [];
+   330   explosions = [];
+   331
+   332   // 每关 20 个敌人
+   333   levelEnemies = [];
+   334   for (let i = 0; i < 20; i++) {
+   335     const types = ['basic', 'fast', 'power'];
+   336     levelEnemies.push(types[i % 3]);
+   337   }
+   338   enemiesRemaining = 20;
+   339   enemySpawnIndex = 0;
+   340   enemySpawnTimer = 0;
+   341
+   342   shieldTimer = 120; // 出生无敌
+   343   shovelTimer = 0;
+   344
+   345   updateUI();
+   346 }
+   347
+   348 function protectBase() {
+   349   // 基地在 (12, 6)
+   350   const baseY = 12, baseX = 6;
+   351   const protection = [
+   352     [baseY-1, baseX-1], [baseY-1, baseX], [baseY-1, baseX+1],
+   353     [baseY, baseX-1], [baseY, baseX+1],
+   354   ];
+   355   for (const [r, c] of protection) {
+   356     if (r >= 0 && r < ROWS && c >= 0 && c < COLS && map[r][c] === EMPTY) {
+   357       map[r][c] = BRICK;
+   358     }
+   359   }
+   360 }
+   361
+   362 function createTank(x, y, dir, type) {
+   363   return {
+   364     x, y, dir, type,
+   365     speed: type === 'player' ? 1.5 : (type === 'fast' ? 1.5 : 1),
+   366     size: TILE,
+   367     shootCooldown: 0,
+   368     shootRate: type === 'fast' ? 90 : (type === 'power' ? 45 : 60),
+   369     hp: type === 'power' ? 3 : 1,
+   370     moveTimer: 0,
+   371     aiDir: dir,
+   372     aiChangeTimer: 0,
+   373     alive: true,
+   374     animFrame: 0,
+   375   };
+   376 }
+   377
+   378 // ===== 输入处理 =====
+   379 function handleKey(key) {
+   380   if (key === 'p' || key === 'P') {
+   381     if (gameState === 'playing') gameState = 'paused';
+   382     else if (gameState === 'paused') gameState = 'playing';
+   383   }
+   384   if (key === 'r' || key === 'R') {
+   385     if (gameState === 'gameover' || gameState === 'win') {
+   386       score = 0;
+   387       lives = 3;
+   388       level = 1;
+   389       loadLevel(level);
+   390       gameState = 'playing';
+   391     }
+   392   }
+   393   if (key === 'Enter' && gameState === 'menu') {
+   394     startGame();
+   395   }
+   396 }
+   397
+   398 // ===== 游戏循环 =====
+   399 function gameLoop(timestamp) {
+   400   if (gameState === 'playing') {
+   401     update();
+   402   }
+   403   render();
+   404   animFrame++;
+   405   requestAnimationFrame(gameLoop);
+   406 }
+   407
+   408 // ===== 更新逻辑 =====
+   409 function update() {
+   410   updatePlayer();
+   411   updateEnemies();
+   412   updateBullets();
+   413   updatePowerups();
+   414   updateParticles();
+   415   updateExplosions();
+   416   spawnEnemies();
+   417   checkCollisions();
+   418   checkLevelClear();
+   419 }
+   420
+   421 function updatePlayer() {
+   422   if (!player.alive) return;
+   423
+   424   let moved = false;
+   425   let newDir = player.dir;
+   426
+   427   if (keys['ArrowUp'] || keys['w'] || keys['W']) { newDir = UP; moved = tr
+       ue; }
+   428   else if (keys['ArrowDown'] || keys['s'] || keys['S']) { newDir = DOWN; m
+       oved = true; }
+   429   else if (keys['ArrowLeft'] || keys['a'] || keys['A']) { newDir = LEFT; m
+       oved = true; }
+   430   else if (keys['ArrowRight'] || keys['d'] || keys['D']) { newDir = RIGHT;
+        moved = true; }
+   431
+   432   player.dir = newDir;
+   433
+   434   if (moved) {
+   435     const nx = player.x + DX[newDir] * player.speed;
+   436     const ny = player.y + DY[newDir] * player.speed;
+   437     if (canMove(nx, ny, player.size, player)) {
+   438       player.x = nx;
+   439       player.y = ny;
+   440     }
+   441     player.animFrame++;
+   442   }
+   443
+   444   if (player.shootCooldown > 0) player.shootCooldown--;
+   445   if (keys[' '] && player.shootCooldown <= 0) {
+   446     shoot(player);
+   447     player.shootCooldown = 20;
+   448   }
+   449
+   450   if (shieldTimer > 0) shieldTimer--;
+   451   if (shovelTimer > 0) {
+   452     shovelTimer--;
+   453     if (shovelTimer === 0) {
+   454       // 恢复基地砖墙
+   455       protectBase();
+   456       const baseY = 12, baseX = 6;
+   457       const protection = [
+   458         [baseY-1, baseX-1], [baseY-1, baseX], [baseY-1, baseX+1],
+   459         [baseY, baseX-1], [baseY, baseX+1],
+   460       ];
+   461       for (const [r, c] of protection) {
+   462         if (map[r][c] === STEEL) map[r][c] = BRICK;
+   463       }
+   464     }
+   465   }
+   466 }
+   467
+   468 function updateEnemies() {
+   469   for (const e of enemies) {
+   470     if (!e.alive) continue;
+   471
+   472     e.aiChangeTimer--;
+   473     if (e.aiChangeTimer <= 0) {
+   474       // AI 随机改变方向
+   475       const dirs = [UP, DOWN, LEFT, RIGHT];
+   476       e.aiDir = dirs[Math.floor(Math.random() * 4)];
+   477       e.aiChangeTimer = 60 + Math.floor(Math.random() * 120);
+   478     }
+   479
+   480     e.dir = e.aiDir;
+   481     const nx = e.x + DX[e.dir] * e.speed;
+   482     const ny = e.y + DY[e.dir] * e.speed;
+   483
+   484     if (canMove(nx, ny, e.size, e)) {
+   485       e.x = nx;
+   486       e.y = ny;
+   487       e.animFrame++;
+   488     } else {
+   489       e.aiChangeTimer = 0; // 碰墙立即换方向
+   490     }
+   491
+   492     if (e.shootCooldown > 0) e.shootCooldown--;
+   493     if (e.shootCooldown <= 0) {
+   494       shoot(e);
+   495       e.shootCooldown = e.shootRate + Math.floor(Math.random() * 30);
+   496     }
+   497   }
+   498 }
+   499
+   500 function updateBullets() {
+   501   for (let i = bullets.length - 1; i >= 0; i--) {
+   502     const b = bullets[i];
+   503     b.x += DX[b.dir] * b.speed;
+   504     b.y += DY[b.dir] * b.speed;
+   505
+   506     // 出界
+   507     if (b.x < 0 || b.x >= W || b.y < 0 || b.y >= H) {
+   508       bullets.splice(i, 1);
+   509       continue;
+   510     }
+   511
+   512     // 碰撞地图
+   513     const col = Math.floor(b.x / TILE);
+   514     const row = Math.floor(b.y / TILE);
+   515     if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
+   516       const tile = map[row][col];
+   517       if (tile === BRICK) {
+   518         map[row][col] = EMPTY;
+   519         bullets.splice(i, 1);
+   520         addExplosion(col * TILE + TILE/2, row * TILE + TILE/2, 'small');
+   521         continue;
+   522       }
+   523       if (tile === STEEL) {
+   524         bullets.splice(i, 1);
+   525         addExplosion(b.x, b.y, 'tiny');
+   526         continue;
+   527       }
+   528       if (tile === WATER) {
+   529         // 子弹飞越水面
+   530       }
+   531       if (tile === BASE) {
+   532         map[row][col] = BASE_DEAD;
+   533         bullets.splice(i, 1);
+   534         addExplosion(col * TILE + TILE/2, row * TILE + TILE/2, 'big');
+   535         gameOver();
+   536         continue;
+   537       }
+   538     }
+   539   }
+   540 }
+   541
+   542 function updatePowerups() {
+   543   // 道具闪烁
+   544 }
+   545
+   546 function updateParticles() {
+   547   for (let i = particles.length - 1; i >= 0; i--) {
+   548     const p = particles[i];
+   549     p.x += p.vx;
+   550     p.y += p.vy;
+   551     p.life--;
+   552     if (p.life <= 0) particles.splice(i, 1);
+   553   }
+   554 }
+   555
+   556 function updateExplosions() {
+   557   for (let i = explosions.length - 1; i >= 0; i--) {
+   558     explosions[i].timer--;
+   559     if (explosions[i].timer <= 0) explosions.splice(i, 1);
+   560   }
+   561 }
+   562
+   563 function spawnEnemies() {
+   564   if (enemySpawnIndex >= levelEnemies.length) return;
+   565
+   566   enemySpawnTimer--;
+   567   if (enemySpawnTimer > 0) return;
+   568
+   569   if (enemies.filter(e => e.alive).length >= 4) return;
+   570
+   571   // 在顶部三个位置随机生成
+   572   const spawnX = [0, 6 * TILE, 12 * TILE];
+   573   const sx = spawnX[enemySpawnIndex % 3];
+   574
+   575   // 检查生成位置是否被占用
+   576   let blocked = false;
+   577   for (const e of enemies) {
+   578     if (e.alive && Math.abs(e.x - sx) < TILE && Math.abs(e.y) < TILE) {
+   579       blocked = true;
+   580       break;
+   581     }
+   582   }
+   583   if (blocked) {
+   584     enemySpawnTimer = 30;
+   585     return;
+   586   }
+   587
+   588   const type = levelEnemies[enemySpawnIndex];
+   589   const e = createTank(sx, 0, DOWN, type);
+   590   enemies.push(e);
+   591   enemySpawnIndex++;
+   592   enemySpawnTimer = 120;
+   593 }
+   594
+   595 function shoot(tank) {
+   596   const bx = tank.x + TILE/2 + DX[tank.dir] * TILE/2;
+   597   const by = tank.y + TILE/2 + DY[tank.dir] * TILE/2;
+   598   bullets.push({
+   599     x: bx, y: by,
+   600     dir: tank.dir,
+   601     speed: tank.type === 'player' ? 4 : 3,
+   602     owner: tank.type === 'player' ? 'player' : 'enemy',
+   603     size: 4,
+   604   });
+   605 }
+   606
+   607 function canMove(x, y, size, self) {
+   608   // 边界检查
+   609   if (x < 0 || x + size > W || y < 0 || y + size > H) return false;
+   610
+   611   // 地图碰撞
+   612   const left = Math.floor(x / TILE);
+   613   const top = Math.floor(y / TILE);
+   614   const right = Math.floor((x + size - 1) / TILE);
+   615   const bottom = Math.floor((y + size - 1) / TILE);
+   616
+   617   for (let r = top; r <= bottom; r++) {
+   618     for (let c = left; c <= right; c++) {
+   619       if (r < 0 || r >= ROWS || c < 0 || c >= COLS) continue;
+   620       const tile = map[r][c];
+   621       if (tile === BRICK || tile === STEEL || tile === WATER || tile === B
+       ASE) {
+   622         return false;
+   623       }
+   624     }
+   625   }
+   626
+   627   // 坦克碰撞
+   628   const allTanks = [player, ...enemies].filter(t => t && t.alive && t !==
+       self);
+   629   for (const t of allTanks) {
+   630     if (rectsOverlap(x, y, size, size, t.x, t.y, t.size, t.size)) {
+   631       return false;
+   632     }
+   633   }
+   634
+   635   return true;
+   636 }
+   637
+   638 function rectsOverlap(x1, y1, w1, h1, x2, y2, w2, h2) {
+   639   return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
+   640 }
+   641
+   642 function checkCollisions() {
+   643   // 子弹 vs 坦克
+   644   for (let i = bullets.length - 1; i >= 0; i--) {
+   645     const b = bullets[i];
+   646
+   647     if (b.owner === 'player') {
+   648       // 玩家子弹 vs 敌人
+   649       for (const e of enemies) {
+   650         if (!e.alive) continue;
+   651         if (b.x >= e.x && b.x <= e.x + e.size && b.y >= e.y && b.y <= e.y
+       + e.size) {
+   652           e.hp--;
+   653           bullets.splice(i, 1);
+   654           if (e.hp <= 0) {
+   655             e.alive = false;
+   656             enemiesRemaining--;
+   657             score += 100;
+   658             addExplosion(e.x + TILE/2, e.y + TILE/2, 'big');
+   659
+   660             // 随机掉落道具
+   661             if (Math.random() < 0.2) {
+   662               spawnPowerup();
+   663             }
+   664           } else {
+   665             addExplosion(b.x, b.y, 'tiny');
+   666           }
+   667           updateUI();
+   668           break;
+   669         }
+   670       }
+   671     } else {
+   672       // 敌人子弹 vs 玩家
+   673       if (player.alive && shieldTimer <= 0) {
+   674         if (b.x >= player.x && b.x <= player.x + player.size &&
+   675             b.y >= player.y && b.y <= player.y + player.size) {
+   676           bullets.splice(i, 1);
+   677           playerHit();
+   678           break;
+   679         }
+   680       }
+   681     }
+   682
+   683     // 子弹 vs 子弹
+   684     for (let j = bullets.length - 1; j >= 0; j--) {
+   685       if (i === j) continue;
+   686       const b2 = bullets[j];
+   687       if (Math.abs(b.x - b2.x) < 6 && Math.abs(b.y - b2.y) < 6) {
+   688         if (i > j) { bullets.splice(i, 1); bullets.splice(j, 1); }
+   689         else { bullets.splice(j, 1); bullets.splice(i, 1); }
+   690         i = Math.min(i, j) - 1;
+   691         break;
+   692       }
+   693     }
+   694   }
+   695
+   696   // 玩家 vs 道具
+   697   for (let i = powerups.length - 1; i >= 0; i--) {
+   698     const p = powerups[i];
+   699     if (player.alive && rectsOverlap(player.x, player.y, player.size, play
+       er.size,
+   700         p.x, p.y, TILE, TILE)) {
+   701       applyPowerup(p.type);
+   702       powerups.splice(i, 1);
+   703     }
+   704   }
+   705 }
+   706
+   707 function playerHit() {
+   708   lives--;
+   709   addExplosion(player.x + TILE/2, player.y + TILE/2, 'big');
+   710   if (lives <= 0) {
+   711     player.alive = false;
+   712     gameOver();
+   713   } else {
+   714     // 重生
+   715     player.x = 4 * TILE;
+   716     player.y = 12 * TILE;
+   717     player.dir = UP;
+   718     shieldTimer = 120;
+   719   }
+   720   updateUI();
+   721 }
+   722
+   723 function spawnPowerup() {
+   724   const types = ['star', 'bomb', 'shield', 'shovel'];
+   725   const type = types[Math.floor(Math.random() * types.length)];
+   726   const x = Math.floor(Math.random() * (COLS - 1)) * TILE;
+   727   const y = Math.floor(Math.random() * (ROWS - 2)) * TILE + TILE;
+   728   powerups.push({ x, y, type, timer: 600 });
+   729 }
+   730
+   731 function applyPowerup(type) {
+   732   switch (type) {
+   733     case 'star':
+   734       player.speed = Math.min(player.speed + 0.3, 2.5);
+   735       score += 200;
+   736       break;
+   737     case 'bomb':
+   738       for (const e of enemies) {
+   739         if (e.alive) {
+   740           e.alive = false;
+   741           enemiesRemaining--;
+   742           score += 100;
+   743           addExplosion(e.x + TILE/2, e.y + TILE/2, 'big');
+   744         }
+   745       }
+   746       break;
+   747     case 'shield':
+   748       shieldTimer = 300;
+   749       break;
+   750     case 'shovel':
+   751       shovelTimer = 600;
+   752       const baseY = 12, baseX = 6;
+   753       const protection = [
+   754         [baseY-1, baseX-1], [baseY-1, baseX], [baseY-1, baseX+1],
+   755         [baseY, baseX-1], [baseY, baseX+1],
+   756       ];
+   757       for (const [r, c] of protection) {
+   758         if (map[r][c] === BRICK || map[r][c] === EMPTY) {
+   759           map[r][c] = STEEL;
+   760         }
+   761       }
+   762       break;
+   763   }
+   764   score += 200;
+   765   updateUI();
+   766 }
+   767
+   768 function addExplosion(x, y, size) {
+   769   const sizes = { tiny: 10, small: 15, big: 20 };
+   770   explosions.push({ x, y, size: sizes[size] || 15, timer: 15, maxTimer: 15
+        });
+   771
+   772   // 粒子
+   773   const count = size === 'big' ? 12 : 6;
+   774   for (let i = 0; i < count; i++) {
+   775     particles.push({
+   776       x, y,
+   777       vx: (Math.random() - 0.5) * 3,
+   778       vy: (Math.random() - 0.5) * 3,
+   779       life: 10 + Math.floor(Math.random() * 10),
+   780       color: Math.random() > 0.5 ? '#ff0' : '#f80',
+   781     });
+   782   }
+   783 }
+   784
+   785 function checkLevelClear() {
+   786   if (enemySpawnIndex >= levelEnemies.length && enemies.filter(e => e.aliv
+       e).length === 0) {
+   787     level++;
+   788     if (level > LEVELS.length) {
+   789       gameState = 'win';
+   790     } else {
+   791       loadLevel(level);
+   792     }
+   793   }
+   794 }
+   795
+   796 function gameOver() {
+   797   gameState = 'gameover';
+   798 }
+   799
+   800 function updateUI() {
+   801   document.getElementById('levelNum').textContent = level;
+   802   document.getElementById('scoreNum').textContent = score;
+   803   document.getElementById('livesNum').textContent = lives;
+   804
+   805   const iconsDiv = document.getElementById('enemyIcons');
+   806   iconsDiv.innerHTML = '';
+   807   const remaining = enemiesRemaining - enemies.filter(e => e.alive).length
+       ;
+   808   for (let i = 0; i < enemiesRemaining - (enemySpawnIndex - enemies.filter
+       (e => !e.alive).length); i++) {
+   809     const icon = document.createElement('div');
+   810     icon.className = 'enemy-icon';
+   811     iconsDiv.appendChild(icon);
+   812   }
+   813 }
+   814
+   815 // ===== 渲染 =====
+   816 function render() {
+   817   ctx.fillStyle = COLORS.bg;
+   818   ctx.fillRect(0, 0, W, H);
+   819
+   820   if (gameState === 'menu') {
+   821     renderMenu();
+   822     return;
+   823   }
+   824
+   825   // 绘制地图（草地层之前）
+   826   for (let r = 0; r < ROWS; r++) {
+   827     for (let c = 0; c < COLS; c++) {
+   828       drawTile(c * TILE, r * TILE, map[r][c], false);
+   829     }
+   830   }
+   831
+   832   // 绘制道具
+   833   for (const p of powerups) {
+   834     drawPowerup(p);
+   835   }
+   836
+   837   // 绘制坦克
+   838   if (player.alive) drawTank(player);
+   839
+   840   for (const e of enemies) {
+   841     if (e.alive) drawTank(e);
+   842   }
+   843
+   844   // 绘制子弹
+   845   for (const b of bullets) {
+   846     drawBullet(b);
+   847   }
+   848
+   849   // 绘制草地层（覆盖坦克）
+   850   for (let r = 0; r < ROWS; r++) {
+   851     for (let c = 0; c < COLS; c++) {
+   852       if (map[r][c] === GRASS) {
+   853         drawTile(c * TILE, r * TILE, GRASS, true);
+   854       }
+   855     }
+   856   }
+   857
+   858   // 绘制护盾效果
+   859   if (player.alive && shieldTimer > 0) {
+   860     drawShield(player);
+   861   }
+   862
+   863   // 绘制爆炸
+   864   for (const e of explosions) {
+   865     drawExplosion(e);
+   866   }
+   867
+   868   // 绘制粒子
+   869   for (const p of particles) {
+   870     ctx.fillStyle = p.color;
+   871     ctx.fillRect(p.x - 1, p.y - 1, 3, 3);
+   872   }
+   873
+   874   // 游戏状态覆盖层
+   875   if (gameState === 'paused') {
+   876     ctx.fillStyle = 'rgba(0,0,0,0.5)';
+   877     ctx.fillRect(0, 0, W, H);
+   878     ctx.fillStyle = '#ff0';
+   879     ctx.font = '24px Courier New';
+   880     ctx.textAlign = 'center';
+   881     ctx.fillText('暂停', W/2, H/2);
+   882     ctx.font = '14px Courier New';
+   883     ctx.fillText('按 P 继续', W/2, H/2 + 30);
+   884   }
+   885
+   886   if (gameState === 'gameover') {
+   887     ctx.fillStyle = 'rgba(0,0,0,0.7)';
+   888     ctx.fillRect(0, 0, W, H);
+   889     ctx.fillStyle = '#f00';
+   890     ctx.font = '28px Courier New';
+   891     ctx.textAlign = 'center';
+   892     ctx.fillText('游戏结束', W/2, H/2 - 20);
+   893     ctx.fillStyle = '#ff0';
+   894     ctx.font = '16px Courier New';
+   895     ctx.fillText('得分: ' + score, W/2, H/2 + 20);
+   896     ctx.fillStyle = '#fff';
+   897     ctx.font = '14px Courier New';
+   898     ctx.fillText('按 R 重新开始', W/2, H/2 + 50);
+   899   }
+   900
+   901   if (gameState === 'win') {
+   902     ctx.fillStyle = 'rgba(0,0,0,0.7)';
+   903     ctx.fillRect(0, 0, W, H);
+   904     ctx.fillStyle = '#0f0';
+   905     ctx.font = '28px Courier New';
+   906     ctx.textAlign = 'center';
+   907     ctx.fillText('恭喜通关!', W/2, H/2 - 20);
+   908     ctx.fillStyle = '#ff0';
+   909     ctx.font = '16px Courier New';
+   910     ctx.fillText('最终得分: ' + score, W/2, H/2 + 20);
+   911     ctx.fillStyle = '#fff';
+   912     ctx.font = '14px Courier New';
+   913     ctx.fillText('按 R 重新开始', W/2, H/2 + 50);
+   914   }
+   915 }
+   916
+   917 function renderMenu() {
+   918   ctx.fillStyle = '#000';
+   919   ctx.fillRect(0, 0, W, H);
+   920
+   921   // 标题
+   922   ctx.fillStyle = '#c00';
+   923   ctx.font = 'bold 36px Courier New';
+   924   ctx.textAlign = 'center';
+   925   ctx.fillText('坦克大战', W/2, 100);
+   926
+   927   // 装饰坦克
+   928   ctx.fillStyle = COLORS.player;
+   929   drawPixelTank(W/2 - 20, 140, UP, COLORS.player, COLORS.playerDark, 0);
+   930
+   931   ctx.fillStyle = '#fff';
+   932   ctx.font = '16px Courier New';
+   933   ctx.fillText('按 Enter 开始游戏', W/2, 220);
+   934
+   935   ctx.fillStyle = '#888';
+   936   ctx.font = '12px Courier New';
+   937   ctx.fillText('方向键移动 · 空格射击', W/2, 260);
+   938   ctx.fillText('P 暂停 · R 重新开始', W/2, 280);
+   939 }
+   940
+   941 function drawTile(x, y, type, isGrassOverlay) {
+   942   switch (type) {
+   943     case BRICK:
+   944       ctx.fillStyle = COLORS.brick;
+   945       ctx.fillRect(x, y, TILE, TILE);
+   946       ctx.fillStyle = COLORS.brickDark;
+   947       // 砖缝
+   948       for (let i = 0; i < 4; i++) {
+   949         ctx.fillRect(x, y + i * 8, TILE, 1);
+   950         ctx.fillRect(x + (i % 2) * 16, y + i * 8, 1, 8);
+   951       }
+   952       break;
+   953     case STEEL:
+   954       ctx.fillStyle = COLORS.steel;
+   955       ctx.fillRect(x, y, TILE, TILE);
+   956       ctx.fillStyle = COLORS.steelLight;
+   957       ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
+   958       ctx.fillStyle = '#666';
+   959       ctx.fillRect(x + 4, y + 4, TILE - 8, TILE - 8);
+   960       break;
+   961     case WATER:
+   962       ctx.fillStyle = COLORS.water;
+   963       ctx.fillRect(x, y, TILE, TILE);
+   964       ctx.fillStyle = COLORS.waterLight;
+   965       const waveOffset = Math.floor(animFrame / 10) % 4;
+   966       for (let i = 0; i < 4; i++) {
+   967         ctx.fillRect(x + ((i * 8 + waveOffset * 2) % TILE), y + i * 8, 8,
+       4);
+   968       }
+   969       break;
+   970     case GRASS:
+   971       ctx.fillStyle = COLORS.grass;
+   972       ctx.fillRect(x, y, TILE, TILE);
+   973       ctx.fillStyle = COLORS.grassDark;
+   974       for (let i = 0; i < 8; i++) {
+   975         ctx.fillRect(x + (i * 4 + 2) % TILE, y + (i * 7) % TILE, 2, 4);
+   976       }
+   977       break;
+   978     case ICE:
+   979       ctx.fillStyle = COLORS.ice;
+   980       ctx.fillRect(x, y, TILE, TILE);
+   981       ctx.fillStyle = COLORS.iceLight;
+   982       ctx.fillRect(x + 4, y + 4, 8, 4);
+   983       ctx.fillRect(x + 16, y + 12, 8, 4);
+   984       break;
+   985     case BASE:
+   986       // 鹰标
+   987       ctx.fillStyle = COLORS.base;
+   988       ctx.fillRect(x + 4, y + 4, TILE - 8, TILE - 8);
+   989       ctx.fillStyle = COLORS.baseDark;
+   990       ctx.fillRect(x + 8, y + 8, TILE - 16, TILE - 16);
+   991       ctx.fillStyle = '#000';
+   992       ctx.font = '16px serif';
+   993       ctx.textAlign = 'center';
+   994       ctx.fillText('★', x + TILE/2, y + TILE/2 + 6);
+   995       break;
+   996     case BASE_DEAD:
+   997       ctx.fillStyle = '#555';
+   998       ctx.fillRect(x + 4, y + 4, TILE - 8, TILE - 8);
+   999       ctx.fillStyle = '#333';
+  1000       ctx.fillRect(x + 8, y + 8, TILE - 16, TILE - 16);
+  1001       break;
+  1002   }
+  1003 }
+  1004
+  1005 function drawTank(tank) {
+  1006   const colors = getTankColors(tank);
+  1007   drawPixelTank(tank.x, tank.y, tank.dir, colors[0], colors[1], tank.animF
+       rame);
+  1008 }
+  1009
+  1010 function getTankColors(tank) {
+  1011   switch (tank.type) {
+  1012     case 'player': return [COLORS.player, COLORS.playerDark];
+  1013     case 'fast': return [COLORS.enemy2, COLORS.enemy2Dark];
+  1014     case 'power': return [COLORS.enemy3, COLORS.enemy3Dark];
+  1015     default: return [COLORS.enemy1, COLORS.enemy1Dark];
+  1016   }
+  1017 }
+  1018
+  1019 function drawPixelTank(x, y, dir, color1, color2, frame) {
+  1020   ctx.save();
+  1021   ctx.translate(x + TILE/2, y + TILE/2);
+  1022   ctx.rotate(dir * Math.PI / 2);
+  1023   ctx.translate(-TILE/2, -TILE/2);
+  1024
+  1025   // 履带
+  1026   ctx.fillStyle = color2;
+  1027   ctx.fillRect(0, 0, 6, TILE);
+  1028   ctx.fillRect(TILE - 6, 0, 6, TILE);
+  1029
+  1030   // 履带纹理
+  1031   ctx.fillStyle = color1;
+  1032   const trackOffset = Math.floor(frame / 2) % 4;
+  1033   for (let i = 0; i < 4; i++) {
+  1034     const ty = ((i * 8 + trackOffset * 2) % TILE);
+  1035     ctx.fillRect(1, ty, 4, 2);
+  1036     ctx.fillRect(TILE - 5, ty, 4, 2);
+  1037   }
+  1038
+  1039   // 车身
+  1040   ctx.fillStyle = color1;
+  1041   ctx.fillRect(8, 4, TILE - 16, TILE - 8);
+  1042
+  1043   // 炮塔
+  1044   ctx.fillStyle = color2;
+  1045   ctx.fillRect(10, 8, TILE - 20, TILE - 16);
+  1046
+  1047   // 炮管
+  1048   ctx.fillStyle = color1;
+  1049   ctx.fillRect(TILE/2 - 2, 0, 4, TILE/2);
+  1050
+  1051   ctx.restore();
+  1052 }
+  1053
+  1054 function drawBullet(b) {
+  1055   ctx.fillStyle = COLORS.bullet;
+  1056   ctx.fillRect(b.x - 2, b.y - 2, 4, 4);
+  1057 }
+  1058
+  1059 function drawShield(tank) {
+  1060   const alpha = Math.sin(animFrame * 0.3) * 0.3 + 0.5;
+  1061   ctx.strokeStyle = `rgba(0, 170, 255, ${alpha})`;
+  1062   ctx.lineWidth = 2;
+  1063   ctx.beginPath();
+  1064   ctx.arc(tank.x + TILE/2, tank.y + TILE/2, TILE/2 + 2, 0, Math.PI * 2);
+  1065   ctx.stroke();
+  1066 }
+  1067
+  1068 function drawPowerup(p) {
+  1069   const flash = Math.floor(animFrame / 15) % 2;
+  1070   if (flash === 0) return;
+  1071
+  1072   ctx.fillStyle = COLORS.powerup;
+  1073   ctx.fillRect(p.x + 2, p.y + 2, TILE - 4, TILE - 4);
+  1074
+  1075   ctx.fillStyle = '#fff';
+  1076   ctx.font = '14px serif';
+  1077   ctx.textAlign = 'center';
+  1078   const icons = { star: '★', bomb: '●', shield: '◆', shovel: '■' };
+  1079   ctx.fillText(icons[p.type] || '?', p.x + TILE/2, p.y + TILE/2 + 5);
+  1080 }
+
+  关卡
+
+  - 预设 5 个关卡，不同地图布局
+  - 每关 20 个敌方坦克
+  - 通关后自动进入下一关
+
+● User answered Claude's questions:
+  ⎿  · 以上游戏设计是否符合你的期望？ → 设计通过，开始实现
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ 继续
+
+● 好的，继续实现坦克大战游戏。让我创建完整的单文件 HTML 游戏。
+
+● Write(tank-battle\index.html)
+  ⎿  Wrote 1102 lines to tank-battle\index.html
+       1 <!DOCTYPE html>
+       2 <html lang="zh-CN">
+       3 <head>
+       4 <meta charset="UTF-8">
+       5 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       6 <title>经典坦克大战</title>
+       7 <style>
+       8 * { margin: 0; padding: 0; box-sizing: border-box; }
+       9 body {
+      10   background: #000;
+     … +1092 lines (ctrl+o to expand)
+
+● 游戏文件已创建。让我验证一下文件结构，然后测试游戏是否可以正常运行。
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Bash(start "" "C:\Users\lanty\Desktop\tank-battle\index.html")
+  ⎿  (No output)
+
+● 游戏已在浏览器中打开。让我检查一下代码是否有明显问题，并准备好 GitHub 上传所需的文件。
+
+● Bash(cd /c/Users/lanty/Desktop/tank-battle && git init)
+  ⎿  Initialized empty Git repository in C:/Users/lanty/Desktop/tank-battle/.git/
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Create file
+ README.md
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+   1 # 坦克大战 🎮
+   2
+   3 经典 FC 风格的坦克大战游戏，使用纯 HTML5 + Canvas 实现。
+   4
+   5 ## 游戏特点
+   6
+   7 - 经典像素风格图形
+   8 - 5 个精心设计的关卡
+   9 - 3 种敌方坦克类型（普通、快速、重装）
+  10 - 4 种道具（星星升级、炸弹清场、护盾无敌、铲子加固）
+  11 - 多种地形（砖墙、钢墙、河流、草地、冰面）
+  12 - 保护基地（鹰标）的经典玩法
+  13
+  14 ## 操作说明
+  15
+  16 | 按键 | 功能 |
+  17 |------|------|
+  18 | ↑ ↓ ← → | 移动坦克 |
+  19 | 空格 | 射击 |
+  20 | P | 暂停/继续 |
+  21 | R | 重新开始 |
+  20 | P | 暂停/继续 |
+  21 | R | 重新开始 |
+      10   background: #000;
+     … +1092 lines (ctrl+o to expand)
+
+● 游戏文件已创建。让我验证一下文件结构，然后测试游戏是否可以正常运行。
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Bash(start "" "C:\Users\lanty\Desktop\tank-battle\index.html")
+  ⎿  (No output)
+
+● 游戏已在浏览器中打开。让我检查一下代码是否有明显问题，并准备好 GitHub 上传所需的文件。
+
+● Bash(cd /c/Users/lanty/Desktop/tank-battle && git init)
+  ⎿  Initialized empty Git repository in C:/Users/lanty/Desktop/tank-battle/.git/
+
+● Write(README.md)
+  ⎿  Wrote 43 lines to README.md
+       1 # 坦克大战 🎮
+       2
+       3 经典 FC 风格的坦克大战游戏，使用纯 HTML5 + Canvas 实现。
+       4
+       5 ## 游戏特点
+       6
+       7 - 经典像素风格图形
+       8 - 5 个精心设计的关卡
+       9 - 3 种敌方坦克类型（普通、快速、重装）
+      10 - 4 种道具（星星升级、炸弹清场、护盾无敌、铲子加固）
+     … +33 lines (ctrl+o to expand)
+
+● Bash(git status)
+  ⎿  On branch master
+
+     No commits yet
+     … +7 lines (ctrl+o to expand)
+
+  Searched for 2 patterns, read 1 file (ctrl+o to expand)
+
+● Update(index.html)
+  ⎿  Added 4 lines, removed 2 lines
+      804
+      805    const iconsDiv = document.getElementById('enemyIcons');
+      806    iconsDiv.innerHTML = '';
+      807 -  const remaining = enemiesRemaining - enemies.filter(e => e.alive).length;
+      808 -  for (let i = 0; i < enemiesRemaining - (enemySpawnIndex - enemies.filter(e => !e.alive).length); i++
+          -) {
+      807 +  const aliveEnemies = enemies.filter(e => e.alive).length;
+      808 +  const notSpawned = levelEnemies.length - enemySpawnIndex;
+      809 +  const totalRemaining = aliveEnemies + notSpawned;
+      810 +  for (let i = 0; i < totalRemaining; i++) {
+      811      const icon = document.createElement('div');
+      812      icon.className = 'enemy-icon';
+      813      iconsDiv.appendChild(icon);
+
+● Update(index.html)
+  ⎿  Added 3 lines, removed 3 lines
+      682
+      683      // 子弹 vs 子弹
+      684      for (let j = bullets.length - 1; j >= 0; j--) {
+      685 -      if (i === j) continue;
+      685 +      if (i === j || i >= bullets.length) continue;
+      686        const b2 = bullets[j];
+      687        if (Math.abs(b.x - b2.x) < 6 && Math.abs(b.y - b2.y) < 6) {
+      688 -        if (i > j) { bullets.splice(i, 1); bullets.splice(j, 1); }
+      689 -        else { bullets.splice(j, 1); bullets.splice(i, 1); }
+      688 +        bullets.splice(Math.max(i, j), 1);
+      689 +        bullets.splice(Math.min(i, j), 1);
+      690          i = Math.min(i, j) - 1;
+      691          break;
+      692        }
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Update(index.html)
+  ⎿  Added 22 lines, removed 12 lines
+      641
+      642  function checkCollisions() {
+      643    // 子弹 vs 坦克
+      644 -  for (let i = bullets.length - 1; i >= 0; i--) {
+      644 +  const bulletsToRemove = new Set();
+      645 +
+      646 +  for (let i = 0; i < bullets.length; i++) {
+      647      const b = bullets[i];
+      648 +    if (bulletsToRemove.has(i)) continue;
+      649
+      650      if (b.owner === 'player') {
+      651        // 玩家子弹 vs 敌人
+      652        for (const e of enemies) {
+      653          if (!e.alive) continue;
+      654          if (b.x >= e.x && b.x <= e.x + e.size && b.y >= e.y && b.y <= e.y + e.size) {
+      655 +          bulletsToRemove.add(i);
+      656            e.hp--;
+      653 -          bullets.splice(i, 1);
+      657            if (e.hp <= 0) {
+      658              e.alive = false;
+      659              enemiesRemaining--;
+     ...
+      676        if (player.alive && shieldTimer <= 0) {
+      677          if (b.x >= player.x && b.x <= player.x + player.size &&
+      678              b.y >= player.y && b.y <= player.y + player.size) {
+      676 -          bullets.splice(i, 1);
+      679 +          bulletsToRemove.add(i);
+      680            playerHit();
+      678 -          break;
+      681          }
+      682        }
+      683      }
+      684 +  }
+      685
+      683 -    // 子弹 vs 子弹
+      684 -    for (let j = bullets.length - 1; j >= 0; j--) {
+      685 -      if (i === j || i >= bullets.length) continue;
+      686 -      const b2 = bullets[j];
+      687 -      if (Math.abs(b.x - b2.x) < 6 && Math.abs(b.y - b2.y) < 6) {
+      688 -        bullets.splice(Math.max(i, j), 1);
+      689 -        bullets.splice(Math.min(i, j), 1);
+      690 -        i = Math.min(i, j) - 1;
+      686 +  // 子弹 vs 子弹
+      687 +  for (let i = 0; i < bullets.length; i++) {
+      688 +    if (bulletsToRemove.has(i)) continue;
+      689 +    for (let j = i + 1; j < bullets.length; j++) {
+      690 +      if (bulletsToRemove.has(j)) continue;
+      691 +      const b1 = bullets[i], b2 = bullets[j];
+      692 +      if (Math.abs(b1.x - b2.x) < 6 && Math.abs(b1.y - b2.y) < 6) {
+      693 +        bulletsToRemove.add(i);
+      694 +        bulletsToRemove.add(j);
+      695          break;
+      696        }
+      697      }
+      698    }
+      699
+      700 +  // 移除标记的子弹（从后往前）
+      701 +  const toRemove = [...bulletsToRemove].sort((a, b) => b - a);
+      702 +  for (const idx of toRemove) {
+      703 +    bullets.splice(idx, 1);
+      704 +  }
+      705 +
+      706    // 玩家 vs 道具
+      707    for (let i = powerups.length - 1; i >= 0; i--) {
+      708      const p = powerups[i];
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Bash(git add index.html README.md && git status)
+  ⎿  warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+     warning: in the working copy of 'index.html', LF will be replaced by CRLF the next time Git touches it
+     On branch master
+     … +7 lines (ctrl+o to expand)
+
+● Bash(git commit -m "$(cat <<'EOF'
+      feat: 经典坦克大战 HTML5 游戏…)
+  ⎿  Error: Exit code 128
+     Author identity unknown
+
+     *** Please tell me who you are.
+
+     Run
+
+       git config --global user.email "you@example.com"
+       git config --global user.name "Your Name"
+
+     … +4 lines (ctrl+o to expand)
+
+● User answered Claude's questions:
+  ⎿  · Git 需要配置用户信息才能提交。你想怎么处理？ → 帮我配置
+
+● User answered Claude's questions:
+  ⎿  · 请提供你的 GitHub 用户名和邮箱地址（用于 git commit 配置） → 我来输入
+
+● 请告诉我你的 GitHub 用户名和邮箱地址（例如：lanty lanty@example.com），我会帮你配置 git。
+
+● Ran 1 stop hook (ctrl+o to expand)
+  ⎿  Stop hook error: Failed with non-blocking status code: /usr/bin/bash: line 1: node: command not found
+
+✻ Baked for 3m 46s
+
+❯ wlopyst https://github.com/wlopyst
+
+● Bash(git config user.name "wlopyst" && git config user.email "wlopyst@users.noreply.github.com")
+  ⎿  (No output)
+
+● Bash(git commit -m "$(cat <<'EOF'
+      feat: 经典坦克大战 HTML5 游戏…)
+  ⎿  [master (root-commit) ce0d0ac] feat: 经典坦克大战 HTML5 游戏
+      2 files changed, 1157 insertions(+)
+      create mode 100644 README.md
+      create mode 100644 index.html
+
+● 游戏已创建完成！以下是上传到 GitHub 的步骤：
+
+  上传步骤
+
+  1. 在 GitHub 创建新仓库
+  - 访问 https://github.com/new
+  - 仓库名输入：tank-battle
+  - 选择 Public
+  - 不要勾选 "Add a README file"
+  - 点击 "Create repository"
+
+  2. 推送代码到 GitHub
+
+  在终端运行以下命令（把 wlopyst 换成你的用户名）：
+
+  cd /c/Users/lanty/Desktop/tank-battle
+  git remote add origin https://github.com/wlopyst/tank-battle.git
+  git branch -M main
+  git push -u origin main
+
+  3. 启用 GitHub Pages（可选）
+  - 进入仓库 → Settings → Pages
+  - Source 选择 main 分支
+  - 保存后可通过 https://wlopyst.github.io/tank-battle 访问
+
+  ---
+  游戏已经在浏览器中打开了，你可以先试试看效果。文件位于：
+  - C:\Users\lanty\Desktop\tank-battle\index.html
+
+  操作说明：
+  - 方向键移动
+  - 空格射击
+  - P 暂停
+  - R 重新开始
+
+● Ran 1 stop hook (ctrl+o to expand)
+  ⎿  Stop hook error: Failed with non-blocking status code: /usr/bin/bash: line 1: node: command not found
+
+✻ Brewed for 20s
+
+※ recap: 创建了一个经典坦克大战 HTML5 游戏，已完成代码和 git commit。下一步是去 GitHub 创建仓库 `tank-battle`，然后运行
+  `git remote add origin` + `git push` 把代码推上去。 (disable recaps in /config)
+
+❯ 将这次整个过程以文本的形式生成为坦克大战.txt
+
+● Write(坦克大战.txt)
+  ⎿  Wrote 240 lines to 坦克大战.txt
+       1 ========================================================================
+       2                     经典坦克大战 HTML5 游戏 - 开发记录
+       3 ========================================================================
+       4
+       5 项目名称: 经典坦克大战
+       6 技术栈: HTML5 + Canvas + 原生 JavaScript
+       7 创建日期: 2026-05-01
+       8 作者: wlopyst
+       9
+      10 ========================================================================
+     … +230 lines (ctrl+o to expand)
+
+● Bash(git add 坦克大战.txt && git commit -m "docs: 添加开发记录文档")
+  ⎿  warning: in the working copy of '坦克大战.txt', LF will be replaced by CRLF the next time Git touches it
+     [main e56e005] docs: 添加开发记录文档
+      1 file changed, 240 insertions(+)
+      create mode 100644 "\345\235\246\345\205\213\345\244\247\346\210\230.txt"
+
+● 已生成开发记录文件 坦克大战.txt，包含以下内容：
+
+  - 需求分析
+  - 技术方案选择
+  - 游戏设计细节（地形、道具、敌方坦克类型）
+  - 技术实现细节（渲染、地图、AI、碰撞等系统）
+  - 代码结构说明
+  - 操作说明
+  - 文件清单
+  - 部署说明
+  - Git 提交记录
+  - 已知问题与改进方向
+
+  文件位于：C:\Users\lanty\Desktop\tank-battle\坦克大战.txt
+
+  已自动提交到 git 仓库。
+
+● Ran 1 stop hook (ctrl+o to expand)
+  ⎿  Stop hook error: Failed with non-blocking status code: /usr/bin/bash: line 1: node: command not found
+
+✻ Sautéed for 32s
+
+※ recap: 创建了经典坦克大战 HTML5 游戏，已完成开发和文档。项目文件在
+  `C:\Users\lanty\Desktop\tank-battle\`，下一步是推送到 GitHub 仓库。 (disable recaps in /config)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ accept edits on (shift+tab to cycle)
